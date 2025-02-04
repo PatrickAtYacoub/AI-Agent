@@ -1,0 +1,105 @@
+% !TEX root = MainDocument.tex
+
+\ProvidesPackage{newmencl}
+\RequirePackage{enumitem}
+\RequirePackage{multicol}
+\RequirePackage{etoolbox}
+\RequirePackage{nomencl}
+\newlist{nomencl}{enumerate}{1}
+\setlist[nomencl]{%
+  topsep=\z@,
+  itemsep=\z@,
+  labelindent=\@symind,
+  labelwidth=\wd\tempbox@b,
+  labelsep*=\@symsep,
+  align=left,
+  leftmargin=!,
+}
+\def\setnomencl#1{\setlist*[nomencl]{#1}}
+\newbox\tempbox@b
+\def\nomentryend{.}
+\def\symbnodot{\let\nomentryend\relax}
+\def\nomenclheader#1{\subsubsection*{#1}}
+\newif\ifmustclose\mustclosefalse
+\def\thenomenclature{%
+  \@ifundefined{chapter}%
+  {\section*{\nomname}%
+   \if@intoc\addcontentsline{toc}{section}{\nomname}\fi}%
+  {\chapter*{\nomname}%
+   \if@intoc\addcontentsline{toc}{chapter}{\nomname}\fi}%
+  \par\nompreamble}%
+\def\endthenomenclature{%
+  \end{nomencl}%
+  \ifinmulticol
+    \end{multicols}%
+    \inmulticolfalse
+  \fi
+  \nompostamble}
+\let\@@nomenclature\nomenclature
+\def\nomenclature{%
+  \PackageError{}{Don't use the \string\nomenclature\space command.%
+     \MessageBreak Use the appropriate \string\addsymbol\space instead}%
+    {}}
+\newdimen\@symsep\@symsep=1em
+\newdimen\@symind\@symind=1em
+\newif\ifinmulticol
+\def\nomgroup#1{%
+  \edef\tempa{\@nameuse{symb@#1@nc}}
+  \ifmustclose
+    \end{nomencl}
+    \ifinmulticol
+      \end{multicols}%
+      \inmulticolfalse
+    \fi
+  \fi\mustclosetrue
+  \vskip\parskip
+  \itemsep\z@
+  \nomenclheader{\@nameuse{symb@#1@title}}%
+  \setbox\tempbox@b\hbox{\@nameuse{symb@#1@widest}}%
+  \expandafter\ifnum\csname symb@\@nameuse{symb@#1@name}@nc\endcsname>\@ne
+    \inmulticoltrue
+    \begin{multicols}{\@nameuse{symb@\@nameuse{symb@#1@name}@nc}}
+  \fi
+  \begin{nomencl}}
+\def\addsymbol#1{\@ifnextchar[%]
+    {\@addsymbol{#1}}{\@symbolnoopt{#1}}}%
+\def\@symbolnoopt#1#2{%
+  \@addsymbol#1[{#2}]{#2}}
+\def\@addsymbol#1[#2]#3#4{%
+  \expandafter\ifx\csname symb@#1\endcsname\@empty\else
+    \PackageError{}{%
+      Class #1 undefined. Use \string\newsymbolclass{#1}}{}
+  \fi
+  \setbox\@tempboxa\hbox{#3}%
+  \setbox\tempbox@b\hbox{\@nameuse{symb@#1@widest}}%
+  \ifdim\wd\tempbox@b<\wd\@tempboxa
+    \csgdef{symb@#1@widest}{#3}%
+  \fi
+  \@nomenclature[\@nameuse{symb@#1@ord}#2]{#3}{#4}%
+  \ignorespaces}
+\newcount\@nsymbcls
+\def\newsymbolclass{\@ifnextchar[%]
+  \@newsymbolclass{\@newsymbolclass[1]}}
+\def\@newsymbolclass[#1]#2#3{%
+  \expandafter\ifx\csname symb@#2\endcsname\@empty
+    \PackageError{}{Symbol Class #2 already defined}{}
+  \fi
+  \global\advance\@nsymbcls\@ne
+  \csgdef{symb@#2}{}%
+  \csxdef{symb@#2@ord}{\@Alph\@nsymbcls}%
+  \csgdef{symb@#2@widest}{}%
+  \csxdef{symb@#2@nc}{#1}% Save number of columns
+  \csxdef{symb@\@nameuse{symb@#2@ord}@name}{#2}% For backreference
+  \protected@csxdef{symb@\@nameuse{symb@#2@ord}@title}{#3}}
+\AtEndDocument{%
+  \count@\z@
+  \@whilenum\count@<\@nsymbcls\do{%
+    \advance\count@\@ne
+    \edef\@tempa{\@nameuse{symb@\@Alph\count@ @name}}%
+    \toks@\expandafter\expandafter\expandafter
+      {\csname symb@\@tempa @widest\endcsname}%
+    \immediate\write\@auxout{%
+      \gdef\expandonce{\csname symb@\@Alph\count@ @widest\endcsname}%
+                      {\the\toks@}}}}%
+\makenomenclature
+\endinput

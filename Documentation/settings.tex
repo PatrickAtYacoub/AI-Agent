@@ -1,0 +1,344 @@
+% !TEX root = MainDocument.tex
+% Präambel to define the Document Settings
+% ---------------------------------------------------------------------------------------
+% Define the Document Class - Do not change, except BCOR
+\documentclass[%
+	a4paper,%            	A4 paper
+	12pt,%        		 	font size
+	parskip = half,% 	          	for a line break with empty line
+	bibliography=totoc,%	add the bibliography to the table of contents
+	toc=listof,%   	     	add list of tables and figures to the table of contents
+	listof=entryprefix,% 	adds the prefix (Table, Figure, Tabelle, Abbildung) to lists
+	numbers=noenddot,%   	no dot at the end of heading numbers (see the comment below)
+	BCOR=0.8cm,%           	binding correction
+	DIV=11,%             	division of height and width of the document
+]{scrartcl}
+
+% ---------------------------------------------------------------------------------------
+% line space manipulation 
+\usepackage[onehalfspacing]{setspace}
+\setstretch{1.3}				% set setspace of about 1.3
+
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0mm} % Reduce line spacing for enumeration bullet points
+
+% ---------------------------------------------------------------------------------------
+% Input Encoding
+\usepackage[utf8]{inputenc}
+% ---------------------------------------------------------------------------------------
+% Output Font Encoding
+\usepackage[T1]{fontenc}
+%\usepackage{mathptmx} % Font like TimesNewRoman (suppresses "\bm" for bold greek letters--> looks miserable)
+%\usepackage{newtxtext} % Font like TimesNewRoman
+%\usepackage{newtxmath} % Font like TimesNewRoman in math mode allowing bold greek letters
+%\addtokomafont{sectioning}{\rmfamily}% serifed font for all headings
+\usepackage[sfdefault,scaled=.85]{FiraSans}
+% ---------------------------------------------------------------------------------------
+% Language Package
+\usepackage[ngerman]{babel}% German package
+%\tagged{english} {\usepackage[english]{babel}}% English package
+% ---------------------------------------------------------------------------------------
+% set the hyphenation for certain words
+\hyphenation{e Copy-left-Li-zenz-ver-ein-bar-ung}
+% ---------------------------------------------------------------------------------------
+% Microtypographical Improvements
+\usepackage{microtype}
+% ---------------------------------------------------------------------------------------
+% Cross-referencing - produce hypertext links in the document
+\usepackage[hidelinks]{hyperref}
+\urlstyle{same}
+% ---------------------------------------------------------------------------------------
+% Citations
+%\usepackage{cite}
+%\def\citepunct{], [} % splitting multi citations 
+%\def\citedash{]--[}
+% ---------------------------------------------------------------------------------------
+% Math
+\usepackage{amsmath} % use only when font mathptmx is used
+%\usepackage{amssymb} % use only when font mathptmx is used
+\usepackage[low-sup]{subdepth} % needed to set subscript at correct depth
+%
+% Non-italic Greek letters
+\usepackage{textgreek}
+\makeatletter
+\DeclareRobustCommand{\cpi}{%
+  \textnormal{%
+    \ifnum\pdf@strcmp{\math@version}{bold}=\z@\bfseries\fi
+    \textpi
+  }%
+}
+\makeatother
+\usepackage{upgreek}
+
+\renewcommand{\Re}{\operatorname{Re}} % make real part look corrct as non-italic
+\renewcommand{\Im}{\operatorname{Im}}
+
+% ---------------------------------------------------------------------------------------
+% Comprehensive units package 
+\usepackage{siunitx}
+\sisetup{per-mode=symbol-or-fraction}
+%\sisetup{locale = DE}	% if german - set correct separator (1,000 instead of 1.000)
+% ---------------------------------------------------------------------------------------
+% Figures
+\usepackage{graphicx}
+\graphicspath{{Figures/}}% Default path for figures
+\usepackage{float} % Places the float at precisely the location in the LaTeX code using H
+%
+\usepackage[caption=false,font=footnotesize]{subfig}% package for subfigures in one figure
+%
+% Vector Graphics
+\usepackage{color}
+\usepackage[ usenames,dvipsnames]{xcolor}
+\definecolor{me_green}{RGB}{61, 182, 15}
+% \usepackage{transparent}
+%\usepackage{epstopdf}
+%
+% Inserting the Task-Sheet
+\usepackage{pdfpages}
+%
+% sets float environments after their first  reference in text as long the environment is close to the reference in the code
+\usepackage{flafter} 
+% ---------------------------------------------------------------------------------------
+% Tables
+\usepackage{array}% Enhanced Options for Tables and Arrays
+\usepackage{booktabs}% For nicer table rules - use the commands toprule, midrule/cmidrule, bottomrule
+\usepackage{longtable}% For Tables that are larger than one page to define repeatable headers and footers
+
+\renewcommand{\arraystretch}{1.1}% enlarge row height in tables
+%
+% Change Table and Figure Caption - Corresponding to Word Template (11 pt and bold label)
+% ?? Footnote in Tabellen ??
+\usepackage{caption}%
+\captionsetup{font={small}}% 
+\captionsetup{labelfont={small,bf}}%
+% Package for Tabstops
+% Used to align Supervisor and Examiner on Title Page
+\usepackage{tabto}%
+
+\usepackage{tabularx}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}} % linksbündig mit Breitenangabe
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1\textwidth}} % zentriert mit Breitenangabe
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1\textwidth}} % rechtsbündig mit Breitenangabe
+% ---------------------------------------------------------------------------------------
+% Quotes
+\let\oldquote\quote
+\let\endoldquote\endquote
+\renewenvironment{quote}[2][]
+ {\if\relax\detokenize{#1}\relax
+    \def\quoteauthor{#2}%
+  \else
+    \def\quoteauthor{#2~---~#1}%
+  \fi
+  \oldquote}
+ {\par\nobreak\smallskip\hfill(\quoteauthor)%
+  \endoldquote\addvspace{\bigskipamount}}
+% ---------------------------------------------------------------------------------------
+% package for a notation/nomenclature
+\usepackage[norefpage]{nomencl}
+\usepackage{newmencl} % package allowing columns in nomenclature
+\makenomenclature
+% ---------------------------------------------------------------------------------------
+% package for a acronyms /abbreviations
+\usepackage[footnote,printonlyused,withpage]{acronym}
+% ---------------------------------------------------------------------------------------
+% Prevents Widows and Orphans
+\clubpenalty=100
+\widowpenalty=400
+% ---------------------------------------------------------------------------------------
+% Define Page Styles
+\usepackage[manualmark,headsepline]{scrlayer-scrpage}
+% Standard Page Style
+\clearpairofpagestyles
+\automark{section}
+\ihead{\leftmark}
+\ohead{\includegraphics[width=0.25\textwidth]{Figures/logo.png}}
+\ofoot{\pagemark}
+%\renewcommand*\chapterpagestyle{scrheadings}
+%
+\newpairofpagestyles{firstPage}{
+  \ihead{}
+  \ohead{\includegraphics[width=0.25\textwidth]{Figures/logo.png}}
+  \ofoot{\pagemark}
+  }
+% ---------------------------------------------------------------------------------------
+% counter captions - new counter per section 
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+\counterwithin{equation}{section}
+% ---------------------------------------------------------------------------------------
+% additional Verbatim environment - more options like in verbatim
+\usepackage{fancyvrb}
+% ---------------------------------------------------------------------------------------
+% Make wrapped graphics in Latex
+\usepackage{wrapfig}
+% Make pictures forceable locations
+\usepackage{float}
+% ---------------------------------------------------------------------------------------
+% include Biblatex for better citing
+\usepackage{csquotes}
+
+\usepackage[backend=biber, style=numeric, sorting=nyt]{biblatex}
+\addbibresource{literature.bib}
+% ---------------------------------------------------------------------------------------
+% better references
+\usepackage[ngerman]{cleveref}
+% ---------------------------------------------------------------------------------------
+\usepackage{listings}
+% \usepackage{xcolor}
+
+% \definecolor{codegreen}{rgb}{0,0.6,0}
+% \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+% \definecolor{codepurple}{rgb}{0.58,0,0.82}
+% \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    % backgroundcolor=\color{backcolour},   
+    % commentstyle=\color{codegreen},
+    % keywordstyle=\color{magenta},
+    % numberstyle=\tiny\color{codegray},
+    % stringstyle=\color{codepurple},
+    language=C++,
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\definecolor{mediumgray}{rgb}{0.3, 0.4, 0.4}
+\definecolor{mediumblue}{rgb}{0.0, 0.0, 0.8}
+\definecolor{forestgreen}{rgb}{0.13, 0.55, 0.13}
+\definecolor{darkviolet}{rgb}{0.58, 0.0, 0.83}
+\definecolor{royalblue}{rgb}{0.25, 0.41, 0.88}
+\definecolor{crimson}{rgb}{	153, 0, 0}
+
+\lstdefinelanguage{TypeScript}{
+    keywords={typeof, new, true, false, catch, function, return, null, switch, var, if, in, while, do, else,    case, break, export, import, from, extends, implements, let, const, class, interface, super, constructor,  this, await, async, enum, finally, instanceof, static, throw, try, boolean, number, eval, parseInt, parseFloat, escape, unescape, any},
+    ndkeywords={class, boolean, throw, implements, import, this},
+      keywordstyle=\color{crimson}\bfseries,
+  ndkeywordstyle=\color{darkviolet}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{mediumgray}\ttfamily,
+  stringstyle=\color{royalblue}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{white},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{crimson}\bfseries,     % Schlüsselwörter in rot
+    commentstyle=\color{mediumgray}\itshape,   % Kommentare in grau und kursiv
+    stringstyle=\color{royalblue}\ttfamily,    % Strings in royalblau
+    identifierstyle=\color{black},             % Identifikatoren in schwarz
+    sensitive=true,
+    morekeywords={import, from, def, class, return, if, else, elif, try, except, finally, for, while, break, continue, pass, yield, lambda, assert, with, as, global, nonlocal, True, False, None},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+
+% ---------------------------------------------------------------------------------------
+% Better tabelling ant timelining
+\usepackage{charter}
+\usepackage{environ}
+\usepackage{tikz}
+\usetikzlibrary{calc,matrix}
+
+\makeatletter
+\let\matamp=&
+\catcode`\&=13
+\makeatletter
+\def&{\iftikz@is@matrix
+  \pgfmatrixnextcell
+  \else
+  \matamp
+  \fi}
+\makeatother
+
+\newcounter{lines}
+\def\endlr{\stepcounter{lines}\\}
+
+\newcounter{vtml}
+\setcounter{vtml}{0}
+
+\newif\ifvtimelinetitle
+\newif\ifvtimebottomline
+\tikzset{description/.style={
+  column 2/.append style={#1}
+ },
+ timeline color/.store in=\vtmlcolor,
+ timeline color=red!80!black,
+ timeline color st/.style={fill=\vtmlcolor,draw=\vtmlcolor},
+ use timeline header/.is if=vtimelinetitle,
+ use timeline header=false,
+ add bottom line/.is if=vtimebottomline,
+ add bottom line=false,
+ timeline title/.store in=\vtimelinetitle,
+ timeline title={},
+ line offset/.store in=\lineoffset,
+ line offset=4pt,
+}
+
+\NewEnviron{vtimeline}[1][]{%
+\setcounter{lines}{1}%
+\stepcounter{vtml}%
+\begin{tikzpicture}[column 1/.style={anchor=east},
+ column 2/.style={anchor=west},
+ text depth=1pt,text height=1ex,
+ row sep=1ex,
+ column sep=1em,
+ #1
+]
+\matrix(vtimeline\thevtml)[matrix of nodes]{\BODY};
+\pgfmathtruncatemacro\endmtx{\thelines-1}
+\path[timeline color st] 
+($(vtimeline\thevtml-1-1.north east)!0.5!(vtimeline\thevtml-1-2.north west)$)--
+($(vtimeline\thevtml-\endmtx-1.south east)!0.5!(vtimeline\thevtml-\endmtx-2.south west)$);
+\foreach \x in {1,...,\endmtx}{
+ \node[circle,timeline color st, inner sep=0.15pt, draw=white, thick] 
+ (vtimeline\thevtml-c-\x) at 
+ ($(vtimeline\thevtml-\x-1.east)!0.5!(vtimeline\thevtml-\x-2.west)$){};
+ \draw[timeline color st](vtimeline\thevtml-c-\x.west)--++(-3pt,0);
+ }
+ \ifvtimelinetitle%
+  \draw[timeline color st]([yshift=\lineoffset]vtimeline\thevtml.north west)--
+  ([yshift=\lineoffset]vtimeline\thevtml.north east);
+  \node[anchor=west,yshift=16pt,font=\large]
+   at (vtimeline\thevtml-1-1.north west) 
+   {\textsc{Timeline \thevtml}: \textit{\vtimelinetitle}};
+ \else%
+  \relax%
+ \fi%
+ \ifvtimebottomline%
+   \draw[timeline color st]([yshift=-\lineoffset]vtimeline\thevtml.south west)--
+  ([yshift=-\lineoffset]vtimeline\thevtml.south east);
+ \else%
+   \relax%
+ \fi%
+\end{tikzpicture}
+}
+
+
+% ---------------------------------------------------------------------------------------
+% Using technical circuits sketches
+\usepackage[straightvoltages]{circuitikz}
+\usepackage{tikz}
+
+
+% ---------------------------------------------------------------------------------------
+% new commands
+% Graphic Citing -> Writes "Quelle" in small footnotesize
+\newcommand*{\quelle}[1]{\par\raggedleft\footnotesize Quelle:~#1}

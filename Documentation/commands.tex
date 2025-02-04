@@ -1,0 +1,23 @@
+% !TEX root = MainDocument.tex
+
+% Set a Word / Phrase in Lower and Upper Quotation Marks
+\newcommand{\SetGF}[1]{\glqq #1\grqq}
+% --------------------------------------------------------------------
+% Faster Math Writing
+% Variable
+\newcommand{\mval}[2]{#1_{\mathrm{#2}}}
+% Vector / Matrix
+\newcommand{\mvec}[2]{\textbf{\textit{#1}}_{\mathrm{#2}}}
+% Complex Vector / Matrix
+\newcommand{\mcvec}[2]{\textbf{\textit{\underline{#1}}}_{\mathrm{#2}}}
+% --------------------------------------------------------------------
+% Faster Backslash
+\newcommand{\tbs}{\textbackslash}
+% --------------------------------------------------------------------
+% Write Unterasbchnitt instead of Unterunterabschnitt in reminding of 
+% Sebastian Stahl
+\addto\extrasngerman{%
+   \def\subsectionautorefname{Unterabschnitt}%
+   \def\subsubsectionautorefname{Unterabschnitt}%
+   \def\subsubsubsectionautorefname{Unterabschnitt}%
+    }

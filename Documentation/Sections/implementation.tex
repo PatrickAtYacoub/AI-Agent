@@ -1,0 +1,142 @@
+\subsection{Phidata Implementation}
+\label{sec:phidata-implementation}
+
+
+
+Das folgende Python-Codebeispiel zeigt, wie die \texttt{Agent}-Klasse mit dem \texttt{SqlAgentStorage}-Backend kombiniert wird:
+
+\begin{lstlisting}[language=Python, style=pythonstyle, caption={Phidata Implementation des KI-Agenten}]
+from phi.agent import Agent
+from phi.model.ollama import Ollama
+from phi.storage.agent.sqlite import SqlAgentStorage
+
+# Erstellen eines Speicherbackends mit einer Sqlite-Datenbank
+storage = SqlAgentStorage(
+    table_name="product_data (product_number INTEGER PRIMARY KEY, input_voltage INTEGER, input_current INTEGER, output_voltage INTEGER, output_current INTEGER, number_io_ports INTEGER, bus_protocol TEXT)",
+    db_file="poc/db/data.db",
+)
+
+# Initialisieren des Agents mit dem Ollama-Modell und dem Speicher
+agent = Agent(
+    model=Ollama(id="deepseek-r1:14b"),
+    markdown=True,
+    storage=storage
+)
+
+# Ausgabe der Antwort im Terminal
+agent.print_response("Which input voltage does the product with the product number 2 have? Take a look in your database first.")
+\end{lstlisting}
+
+\subsubsection{Ausgabe}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{Figures/results/phidata_01.png} 
+        \captionof{figure}{Beispielausgabe 1}
+        \label{fig:phidata-bsp01}
+    \end {center}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{Figures/results/phidata_02.png} 
+        \captionof{figure}{Beispielausgabe 2}
+        \label{fig:phidata-bsp02}
+    \end {center}
+\end{figure}
+
+\subsection{Erstellung der Datenbank}
+
+Falls die Sqlite-Datenbank noch nicht existiert, muss sie erstellt werden. Der folgende Code stellt sicher, dass die Datenbank und die Tabelle existieren, und fügt einige Beispieldaten hinzu.
+
+\begin{lstlisting}[language=Python, style=pythonstyle, caption={Code zur Erstellung der Beispiel-Datenbank}]
+import sqlite3
+import os
+
+# Pfad zur Datenbankdatei
+db_path = './poc/db/produkte.db'
+
+# Überprüfen, ob die Datenbankdatei existiert
+if not os.path.exists(db_path):
+    # Erstellen der Datenbankdatei
+    open(db_path, 'w').close()
+
+    # Verbindung zur SQLite-Datenbank herstellen (wird erstellt, wenn sie nicht existiert)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Tabelle erstellen
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS produkte (
+        product_number INTEGER PRIMARY KEY,
+        input_voltage INTEGER,
+        input_current INTEGER,
+        output_voltage INTEGER,
+        output_current INTEGER,
+        number_io_ports INTEGER,
+        bus_protocol TEXT
+    )
+    ''')
+
+    # Beispiel-Daten hinzufügen
+    cursor.execute('''
+    INSERT INTO produkte (product_number, input_voltage, input_current, output_voltage, output_current, number_io_ports, bus_protocol)
+    VALUES
+    (1, 24, 2, 24, 2, 4, 'Modbus TCP'),
+    (2, 12, 1, 24, 2, 2, 'Modbus RTU'),
+    (3, 24, 2, 12, 1, 4, 'Modbus TCP')
+    ''')
+
+    # Änderungen speichern und Verbindung schließen
+    conn.commit()
+    conn.close()
+else:
+    print("Datenbank existiert bereits.")
+\end{lstlisting}
+
+Dieser Code stellt sicher, dass die Datenbankdatei existiert, und erstellt gegebenenfalls eine neue Datenbank mit einer Tabelle für Produktdaten. Es werden Beispieldaten in die Tabelle eingefügt, wenn die Datenbank neu erstellt wird.
+
+\subsection{Offizielle Dokumentation}
+
+\subsubsection{Sqlite Agent Storage}
+
+Phidata unterstützt die Verwendung von Sqlite als Speicher-Backend für Agents über die \texttt{SqlAgentStorage}-Klasse. \cite{phidata_sqliteagent}
+
+\textbf{Verwendung:}
+
+Es ist erforderlich, entweder \texttt{db\_url}, \texttt{db\_file} oder \texttt{db\_engine} anzugeben. Das folgende Beispiel verwendet \texttt{db\_file}:
+
+\begin{lstlisting}[language=Python, style=pythonstyle, caption={Verwendung von \texttt{SqlAgentStorage}}]
+from phi.storage.agent.sqlite import SqlAgentStorage
+
+# Erstellen eines Speicherbackends mit einer Sqlite-Datenbank
+storage = SqlAgentStorage(
+    table_name="agent_sessions",     # Speichert Sitzungen in der ai.sessions-Tabelle
+    db_file="tmp/data.db",           # Sqlite-Datenbankdatei
+)
+
+# Speicher zum Agent hinzufügen
+agent = Agent(storage=storage)
+\end{lstlisting}
+
+\subsubsection{Parameter}
+
+Der Konstruktor von \texttt{SqlAgentStorage} nimmt die folgenden Parameter entgegen:
+
+\begin{table}[h]
+    \caption{Parameter des \texttt{SqlAgentStorage}-Konstruktors}
+    \centering
+    \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{6cm}|}
+        \hline
+        \textbf{Parameter}        & \textbf{Typ}      & \textbf{Standardwert} & \textbf{Beschreibung}                                        \\
+        \hline
+        \texttt{table\_name}      & string             & -                & Name der zu verwendenden Tabelle.                              \\
+        \texttt{schema}           & Optional string    & "ai"             & Name des Schemas, Standardwert ist "ai".                        \\
+        \texttt{db\_url}          & Optional string    & None             & Datenbank-URL, falls angegeben.                                \\
+        \texttt{db\_engine}       & Optional \texttt{Engine} & None         & Zu verwendender Datenbank-Engine.                              \\
+        \texttt{schema\_version}  & integer            & 1                & Version des Schemas, Standardwert ist 1.                        \\
+        \texttt{auto\_}\texttt{upgrade\_} \texttt{schema} & boolean        & False            & Wenn wahr, wird das Schema automatisch aktualisiert, wenn erforderlich. \\
+        \hline
+    \end{tabular}
+\end{table}
+

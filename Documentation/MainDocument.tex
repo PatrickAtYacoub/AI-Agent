@@ -1,0 +1,59 @@
+% This is the Main Document
+% ---------------------------------------------------------------------------------------
+% General Settings / Präambel
+\input{settings}
+\input{commands}
+\setlength{\headheight}{27.35pt} % set headheight as warned
+\setlength{\footheight}{18.85pt}  % set footheight as warned
+\setlength{\footskip}{30pt}        % adjust footskip as necessary
+% ---------------------------------------------------------------------------------------
+% Start of the Document
+\begin{document}
+\pagenumbering{Roman}
+% 
+% ---------------------------------------------------------------------------------------
+% Include Title Page
+\pagestyle{empty}
+
+\input{Sections/_General/titlepage_researchProject_ger}
+
+\newpage
+% ---------------------------------------------------------------------------------------
+% Abstract
+\pagestyle{scrheadings}
+% ---------------------------------------------------------------------------------------
+% Table of Contents, Lists of Figures and Tables
+\thispagestyle{firstPage}
+\tableofcontents
+\newpage
+\thispagestyle{firstPage}
+\listoffigures
+Alle Abbildungen, bei denen nicht explizit eine Quelle angegeben wurde, sind selbst erstellt. Alle Rechte liegen beim Autor.
+\newpage
+\thispagestyle{firstPage}
+\lstlistoflistings
+\newpage
+\thispagestyle{firstPage}
+\listoftables  
+\newpage
+% ---------------------------------------------------------------------------------------
+% Content
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\section{KI-Agenten Frameworks}
+\input{Sections/index}
+\section{Implementation}
+\input{Sections/implementation}
+% ---------------------------------------------------------------------------------------
+% Appendix
+\newpage
+\printbibliography
+ %\addtocontents{toc}{\contentsline {section}{\numberline {}Anhang}{}}
+ \addcontentsline{toc}{section}{Anhang}
+\pagenumbering{roman} % small roman page numbers 
+\thispagestyle{firstPage}
+\appendix
+% ---------------------------------------------------------------------------------------
+% End of the Document
+\end{document}
+% ---------------------------------------------------------------------------------------
