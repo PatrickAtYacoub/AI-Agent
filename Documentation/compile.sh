@@ -4,6 +4,8 @@
 filename=$1
 basename="${filename%.tex}"
 
+rm -rf build
+
 mkdir -p build
 chmod u+w build
 

@@ -1,7 +1,9 @@
+Zunächst wurde die Entwicklung mit Phidata ausprobiert. Diese erwies sich jedoch im Nachhinein als nicht zuverlässig genug für unsere Anforderungen. 
+Aus diesem Grund folgt im nächsten Abschnitt eine Implementierung mit Langchain.
+
+
 \subsection{Phidata Implementation}
 \label{sec:phidata-implementation}
-
-
 
 Das folgende Python-Codebeispiel zeigt, wie die \texttt{Agent}-Klasse mit dem \texttt{SqlAgentStorage}-Backend kombiniert wird:
 
@@ -140,3 +142,71 @@ Der Konstruktor von \texttt{SqlAgentStorage} nimmt die folgenden Parameter entge
     \end{tabular}
 \end{table}
 
+\subsection{Langchain Implementation}
+\label{sec:langchain-implementation}
+
+Das folgende Python-Codebeispiel zeigt, wie ein KI-Agent mit Langchain implementiert wird, um eine SQLite-Datenbank zu durchsuchen und mit einem LLM-Modell zu interagieren:
+
+\begin{lstlisting}[style=pythonstyle, caption={Langchain Implementation des KI-Agenten}]
+import sqlite3
+from langchain.chat_models import ChatOllama
+from langchain.agents import initialize_agent, AgentType
+from langchain.tools import Tool
+from langchain.memory import ConversationBufferMemory
+from langchain.tools.sql_database.tool import QuerySQLDataBaseTool
+from langchain.sql_database import SQLDatabase
+
+# SQLite-Datenbank laden
+db_path = "./poc/db/produkte.db"  # Anpassen an den tatsächlichen Speicherort
+database = SQLDatabase.from_uri(f"sqlite:///{db_path}")
+
+# Abfrage-Tool für den Agenten definieren
+query_tool = QuerySQLDataBaseTool(db=database)
+
+# Ollama LLM initialisieren
+llm = ChatOllama(model="llama3.1:latest")  # Modell ggf. anpassen
+
+# Konversationsspeicher für Kontext
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
+# Werkzeuge für den Agenten definieren
+tools = [
+    Tool(
+        name="QuerySQLiteDB",
+        func=query_tool.run,
+        description="Verwende dieses Tool, um Informationen aus der SQLite-Datenbank abzurufen. Eingabe sollte eine natürliche Sprachabfrage sein, die automatisch in eine SQL-Abfrage umgewandelt wird. Tabelle 'produkte': (product_number INTEGER PRIMARY KEY, input_voltage INTEGER, input_current INTEGER, output_voltage INTEGER, output_current INTEGER, number_io_ports INTEGER, bus_protocol TEXT)"
+    )
+]
+
+# LangChain-Agent initialisieren
+agent = initialize_agent(
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    tools=tools,
+    llm=llm,
+    verbose=True,
+    memory=memory
+)
+
+# Chat-Schleife starten
+print("Chat mit dem LLM (tippe 'exit' zum Beenden)")
+while True:
+    user_input = input("You: ")
+    if user_input.lower() == "exit":
+        break
+    response = agent.run(user_input)
+    print("LLM:", response)
+
+# Datenbankverbindung schließen
+conn.close()
+\end{lstlisting}
+
+\subsubsection{Funktionsweise}
+Der Agent nutzt das \texttt{QuerySQLiteDB}-Tool, um bei Bedarf eigenständig SQL-Abfragen zu generieren. Das Ollama LLM verarbeitet die Benutzereingaben und entscheidet, ob eine Datenbankabfrage erforderlich ist. Durch den Konversationsspeicher bleibt der Kontext über mehrere Interaktionen hinweg erhalten.
+
+\subsubsection{Beispielabfragen}
+\begin{itemize}
+    \item \texttt{Which input voltage does the product with product number 2 have?}
+    \item \texttt{How many IO ports does product 1 have?}
+\end{itemize}
+
+Diese Implementierung bietet eine zuverlässige Alternative zur Phidata-Lösung und ermöglicht eine flexible Interaktion mit der SQLite-Datenbank.
