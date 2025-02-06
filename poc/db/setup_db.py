@@ -32,7 +32,8 @@ if not os.path.exists(db_path):
     VALUES
     (1, 24, 2, 24, 2, 4, 'Modbus TCP'),
     (2, 12, 1, 24, 2, 2, 'Modbus RTU'),
-    (3, 24, 2, 12, 1, 4, 'Modbus TCP')
+    (3, 17, 2, 12, 1, 4, 'Profinet'),
+    (4, 12, 1, 12, 1, 2, 'Ethernet/IP')
     ''')
 
     # Änderungen speichern und Verbindung schließen
