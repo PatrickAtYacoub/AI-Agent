@@ -1,0 +1,37 @@
+Die Auswahl des optimalen Modells für den Einsatz in Agentensystemen ist entscheidend für deren Leistungsfähigkeit und Effizienz. Instruction-tuned Large Language Models (LLMs) haben sich dabei als besonders geeignet erwiesen. Im Folgenden wird untersucht, warum diese Modelle für Agentensysteme vorteilhaft sind und welches Modell derzeit als führend gilt.
+
+\subsection{Vorteile von Instruction-Tuning}
+
+Instruction-Tuning bezeichnet die Feinabstimmung von LLMs anhand von Datensätzen, die aus Anweisungen und den dazugehörigen gewünschten Antworten bestehen. Diese Methode bietet mehrere Vorteile:
+
+    Verbesserte Aufgabenbewältigung: Durch das Training mit spezifischen Anweisungen können Modelle besser auf verschiedene Aufgaben reagieren und die gewünschten Ergebnisse liefern. \cite{ibm_instruction_tuning}
+
+    Gesteigerte Anpassungsfähigkeit: Instruction-tuned Modelle sind in der Lage, sich besser an unterschiedliche Aufgabenstellungen anzupassen, da sie gelernt haben, allgemeinen Anweisungen zu folgen.\cite{xarchives_instruction_tuning}
+
+    Kontrollierbares Verhalten: Durch das Instruction-Tuning wird das Verhalten der Modelle vorhersehbarer und kontrollierbarer, was besonders in sicherheitskritischen Anwendungen von Vorteil ist. \cite{xarchives_instruction_tuning}
+
+\subsection{Empfohlenes Modell: Qwen2.5}
+ \cite{roth_researchers_2025}
+ 
+ \minisec{Effizienz durch Distillation}
+ Das Modell wurde mithilfe von Distillation aus Googles Gemini-Modell verfeinert. Dadurch kann Qwen2.5 effektiv Wissen aus leistungsfähigeren Modellen aufnehmen, was für Agentensysteme von Vorteil ist, die sich dynamisch verbessern müssen.
+ 
+ \minisec{Geringe Kosten und schnelle Anpassbarkeit}
+ Die Forscher konnten mit nur 16 Nvidia H100 GPUs ein leistungsfähiges Modell in nur 26 Minuten für weniger als 50~US-Dollar trainieren. Dies macht Qwen2.5 ideal für Agentensysteme, die mit begrenzten Ressourcen arbeiten oder schnell angepasst werden müssen.
+ 
+ \minisec{Optimierte Datenverarbeitung}
+ Obwohl die Forscher mit 59.000 Fragen begannen, stellten sie fest, dass ein kleiner Datensatz mit nur 1.000 Fragen nahezu gleichwertige Ergebnisse lieferte. Dies spricht für die Effizienz von Qwen2.5 im Umgang mit begrenzten, aber relevanten Daten, was in Agentensystemen besonders nützlich ist.
+ 
+ \minisec{Test-Time Scaling für verbesserte Entscheidungsfindung}
+ Qwen2.5 unterstützt eine Technik namens \emph{Test-Time Scaling}, bei der das Modell durch das Schlüsselwort \texttt{Wait} dazu gezwungen wird, länger über eine Antwort nachzudenken. Dadurch kann es Antworten iterativ verbessern. In Agentensystemen ermöglicht dies robustere Entscheidungen und eine automatische Fehlerkorrektur.
+ 
+ \minisec{Leistungsstarke Schlussfolgerungsfähigkeiten}
+ Das auf Qwen2.5 basierende Modell \emph{s1} übertrifft OpenAIs \emph{o1-preview}-Modell um bis zu 27~Prozent bei mathematischen Wettbewerbsfragen. Dies zeigt die starken \emph{Reasoning}-Fähigkeiten des Modells, die für autonome Agentensysteme essenziell sind.
+ 
+ \minisec{Fazit}
+ Durch die Kombination aus Effizienz, Skalierbarkeit, geringen Kosten und starken Schlussfolgerungsfähigkeiten eignet sich Qwen2.5 hervorragend als Grundlage für leistungsfähige Agentensysteme.
+
+
+\subsection{Fazit}
+
+Instruction-tuned LLMs wie Qwen2.5 bieten erhebliche Vorteile für den Einsatz in Agentensystemen. Ihre Fähigkeit, spezifische Anweisungen zu befolgen, sich an verschiedene Aufgaben anzupassen und ein kontrollierbares Verhalten zu zeigen, macht sie zu einer ausgezeichneten Wahl für Entwickler, die leistungsfähige und effiziente Agentensysteme implementieren möchten.
