@@ -43,6 +43,7 @@ def execute_update_query(update_sql):
 # Initialize Ollama LLM
 model = "llama3.1:latest"
 model = "deepseek-r1:14b"
+model = "llama3.2-vision"
 model = "qwen2.5:14b"       # https://github.com/QwenLM/Qwen-Agent?utm_source=chatgpt.com; https://www.reddit.com/r/LocalLLaMA/comments/1gheq9t/imo_the_best_model_for_agents_qwen25_14b/?utm_source=chatgpt.com
 llm = ChatOllama(model=model)  # Change to your preferred Ollama model
 
