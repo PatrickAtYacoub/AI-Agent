@@ -1,0 +1,28 @@
+@startuml
+participant User
+participant PlanAndExecute
+participant AgentExecutor
+participant Database
+
+User -> PlanAndExecute: Anfrage nach Produktdetails
+PlanAndExecute -> AgentExecutor: Starte neue AgentExecutor-Chain
+AgentExecutor -> Database: SELECT * FROM produkte WHERE product_number = 2
+Database -> AgentExecutor: (2, 15, 1, 24, 2, 2, 'Modbus RTU')
+AgentExecutor -> PlanAndExecute: Produktdetails erhalten
+PlanAndExecute -> User: "Product Number 2 has an input voltage of 15V, output voltage of 24V and uses Modbus RTU."
+
+User -> PlanAndExecute: Prüfen, ob die Produktdetails eine Eingangsspannung enthalten
+PlanAndExecute -> AgentExecutor: Starte neue AgentExecutor-Chain
+AgentExecutor -> PlanAndExecute: "Die Eingangsspannung beträgt 15V."
+PlanAndExecute -> User: "Die Eingangsspannung beträgt 15V."
+
+User -> PlanAndExecute: Falls gefunden, notiere den Wert
+PlanAndExecute -> AgentExecutor: Starte neue AgentExecutor-Chain
+AgentExecutor -> PlanAndExecute: "Die Eingangsspannung beträgt 15V."
+PlanAndExecute -> User: "Die Eingangsspannung beträgt 15V."
+
+User -> PlanAndExecute: Formuliere die endgültige Antwort
+PlanAndExecute -> AgentExecutor: Starte neue AgentExecutor-Chain
+AgentExecutor -> PlanAndExecute: "Die Eingangsspannung beträgt 15V."
+PlanAndExecute -> User: "Die Eingangsspannung beträgt 15V."
+@enduml

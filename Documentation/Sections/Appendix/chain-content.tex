@@ -1,0 +1,76 @@
+
+\subsection{Chain Content Example}
+
+\begin{lstlisting}[caption={Beispielablauf der Chain},label={lst:chain-content}]
+> Entering new PlanAndExecute chain...
+steps=[Step(value='Look up the product details for product-number 2 in a database or catalog.'), Step(value='Check if the product details include information about its input voltage.'), Step(value='If the product details are found and include input voltage, note down the value.'), Step(value="Given the above steps taken, please respond to the user's original question.\n\n")]
+
+> Entering new AgentExecutor chain...
+Thought: To retrieve the product details for product-number 2, I need to execute a SELECT query on the 'produkte' table with the condition WHERE product_number = 2.
+
+Action:
+```
+{
+  "action": "SelectQuery",
+  "action_input": "SELECT * FROM produkte WHERE product_number = 2"
+}
+Observation: (2, 15, 1, 24, 2, 2, 'Modbus RTU')
+Thought:I have retrieved the details for product-number 2. The final answer can now be provided.
+
+Action:
+```
+{
+  "action": "Final Answer",
+  "action_input": "Product Number 2 has an input voltage of 15V, output voltage of 24V and uses Modbus RTU communication protocol."
+}
+```
+
+
+Step: Look up the product details for product-number 2 in a database or catalog.
+Response: Product Number 2 has an input voltage of 15V, output voltage of 24V and uses Modbus RTU communication protocol.
+
+> Entering new AgentExecutor chain...
+Thought: I have already obtained the required information in a previous step. The product with number 2 has an input voltage of 15V.
+Action:
+```
+{
+  "action": "Final Answer",
+  "action_input": "The product details for product-number 2 include information about its input voltage; it is 15 volts."
+}
+```
+
+
+Step: Check if the product details include information about its input voltage.
+
+Response: The product details for product-number 2 include information about its input voltage; it is 15 volts.
+
+> Entering new AgentExecutor chain...
+Thought: I know what to respond.
+Action:
+```
+{
+  "action": "Final Answer",
+  "action_input": "The input voltage for Product Number 2 is 15V."
+}
+```
+
+
+Step: If the product details are found and include input voltage, note down the value.
+
+Response: The input voltage for Product Number 2 is 15V.
+
+> Entering new AgentExecutor chain...
+Thought: I know what to respond
+Action:
+```
+{
+  "action": "Final Answer",
+  "action_input": "The input voltage for product number 2 is 15V."
+}
+```
+
+
+Step: Given the above steps taken, please respond to the user's original question.
+
+Response: The input voltage for product number 2 is 15V.
+\end{lstlisting}
