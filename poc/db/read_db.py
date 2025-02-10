@@ -32,3 +32,11 @@ if __name__ == "__main__":
     db_path = 'poc/db/produkte.db'
     table_name = 'produkte'
     print_table(db_path, table_name)
+
+    # print types of each column
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    rows = cursor.fetchall()
+    [print(line) for line in rows]
+    conn.close()

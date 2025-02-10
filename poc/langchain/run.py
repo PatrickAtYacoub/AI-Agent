@@ -58,12 +58,22 @@ def execute_update_query(update_sql, params=None):
     try:
         with get_db_session() as session:
             sql = text(update_sql)
-            session.execute(sql, params)
-            session.commit()
-            return "Database successfully updated."
+            res = session.execute(sql, params)  # Falls hier eine Exception kommt, wird sie gefangen
+            
+            affected_rows = res.rowcount  # Anzahl der betroffenen Zeilen
+            
+            if affected_rows == 0:
+                session.rollback()  # Falls keine Zeilen betroffen sind, kein Commit!
+                return "No rows were updated."
+            
+            session.commit()  # Commit erst, wenn sicher ist, dass die Query erfolgreich war
+            return f"Database successfully updated."
+    
     except Exception as e:
         logger.error(f"Database update failed: {str(e)}")
         return f"Database update failed: {str(e)}"
+
+
 
 # Initialize Planner and Executor LLMs
 planner_llm = ChatOllama(model="llama3.1:latest")
@@ -77,18 +87,20 @@ tools = [
     Tool(
         name="SelectQuery",
         func=select_query,
-        description="Use this tool to gather information from the database. Generate a valid SQL SELECT statement and pass it to this tool. Example: 'SELECT * FROM produkte WHERE product_number = 2'."
+        description="Use this tool to gather information from the database. The database outline is: Table Produkte (product_number INTEGER PRIMARY KEY,input_voltage INTEGER,input_current INTEGER,output_voltage INTEGER,output_current INTEGER,number_io_ports INTEGER,bus_protocol TEXT). Generate a valid SQL SELECT statement and pass it to this tool. Example: 'SELECT * FROM produkte WHERE product_number = 2'."
     ),
     Tool(
         name="ExecuteUpdateQuery",
         func=execute_update_query,
-        description="Use this tool to update records. Example: 'UPDATE produkte SET input_voltage = 15 WHERE product_number = 2'."
+        description="Use this tool to update records. The database outline is: Table Produkte (product_number INTEGER PRIMARY KEY,input_voltage INTEGER,input_current INTEGER,output_voltage INTEGER,output_current INTEGER,number_io_ports INTEGER,bus_protocol TEXT). Example: 'UPDATE produkte SET input_voltage = 15 WHERE product_number = 2'."
     )
 ]
 
 prompt_template = """
-You are an SQL expert. Answer the user's questions by querying the database.
+You are an SQL expert. Answer the user's questions by querying the database about the product data.
 Only run a query if necessary, and stop once you retrieve the needed information.
+Your database looks like this:
+Table: Produkte: product_number INTEGER PRIMARY KEY, input_voltage INTEGER, input_current INTEGER, output_voltage INTEGER, output_current INTEGER, number_io_ports INTEGER, bus_protocol TEXT
 
 User Question: {input}
 
@@ -102,25 +114,36 @@ executor = load_agent_executor(executor_llm, tools, verbose=False)
 # Initialize Plan-and-Execute Agent
 agent = PlanAndExecute(planner=planner, executor=executor, verbose=False)
 
-# Example prompt
-prompt1 = "Which input-voltage does the product with product-number 2 have?"
-response = agent.run(prompt1)
-print("LLM:", response)
+if __name__ == "__main___":
+    you = "You: "
 
-prompt2 = "Update the input-voltage of the product with product-number 2 to 18V."
-response = agent.run(prompt2)
-print("LLM:", response)
-
-response = agent.run(prompt1)
-print("LLM:", response)
-
-exit()
-
-# Interactive chat loop
-print("Chat with the LLM (type 'exit' to stop)")
-while True:
-    user_input = input("You: ")
-    if user_input.lower() == "exit":
-        break
-    response = agent.run(user_input)
+    # Example prompt
+    prompt1 = "Which input-voltage does the product with product-number 2 have?"
+    print(you+prompt1)
+    response = agent.run(prompt1)
     print("LLM:", response)
+
+    prompt2 = "Update the input-voltage of the product with product-number 2 to 18V."
+    print(you+prompt2)
+    response = agent.run(prompt2)
+    print("LLM:", response)
+
+    print(you+prompt1)
+    response = agent.run(prompt1)
+    print("LLM:", response)
+
+    prompt = "Welche technischen Daten hat Produkt 3"
+    print(you+prompt)
+    response = agent.run(prompt)
+    print("LLM:", response)
+
+    exit()
+
+    # Interactive chat loop
+    print("Chat with the LLM (type 'exit' to stop)")
+    while True:
+        user_input = input(you)
+        if user_input.lower() == "exit":
+            break
+        response = agent.run(user_input)
+        print("LLM:", response)
