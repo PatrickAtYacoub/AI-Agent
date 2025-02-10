@@ -57,7 +57,8 @@ def execute_update_query(update_sql, params=None):
     """Executes an SQL UPDATE statement safely with parameters."""
     try:
         with get_db_session() as session:
-            session.execute(update_sql, params)
+            sql = text(update_sql)
+            session.execute(sql, params)
             session.commit()
             return "Database successfully updated."
     except Exception as e:
@@ -96,15 +97,23 @@ Thought: {agent_scratchpad}
 
 # Load planner and executor
 planner = load_chat_planner(planner_llm)
-executor = load_agent_executor(executor_llm, tools, verbose=True)
+executor = load_agent_executor(executor_llm, tools, verbose=False)
 
 # Initialize Plan-and-Execute Agent
-agent = PlanAndExecute(planner=planner, executor=executor, verbose=True)
+agent = PlanAndExecute(planner=planner, executor=executor, verbose=False)
 
 # Example prompt
-prompt = "Which input-voltage does the product with product-number 2 have?"
-response = agent.run(prompt)
+prompt1 = "Which input-voltage does the product with product-number 2 have?"
+response = agent.run(prompt1)
 print("LLM:", response)
+
+prompt2 = "Update the input-voltage of the product with product-number 2 to 18V."
+response = agent.run(prompt2)
+print("LLM:", response)
+
+response = agent.run(prompt1)
+print("LLM:", response)
+
 exit()
 
 # Interactive chat loop
