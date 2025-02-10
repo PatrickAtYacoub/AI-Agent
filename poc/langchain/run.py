@@ -1,45 +1,67 @@
-import sqlite3
-from langchain_community.chat_models import ChatOllama
-from langchain_community.tools import QuerySQLDataBaseTool
-from langchain_community.utilities import SQLDatabase
-from langchain_experimental.plan_and_execute import PlanAndExecute, load_agent_executor, load_chat_planner
-from langchain.tools import Tool
-from langchain.memory import ConversationBufferMemory
+import logging
 import re
+from contextlib import contextmanager
+from sqlalchemy import create_engine, Column, Integer, String, Table, MetaData, text
+from sqlalchemy.orm import sessionmaker
+from langchain_community.chat_models import ChatOllama
+from langchain_experimental.plan_and_execute import PlanAndExecute, load_agent_executor, load_chat_planner
+from langchain.memory import ConversationBufferMemory
+from langchain.tools import Tool
+from langchain_community.utilities import SQLDatabase
 
-# Example-Prompt: Which input-voltage does the product with product-number 2 have? or I heard, the produkt number 2 has now an changed input voltage to 15V.
-# Load SQLite database
-db_path = "./poc/db/produkte.db"  # Change this to your actual database file
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
-database = SQLDatabase.from_uri(f"sqlite:///{db_path}")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Define query tool for the agent
-query_tool = QuerySQLDataBaseTool(db=database)
+# Database setup
+DB_PATH = "./poc/db/produkte.db"
+engine = create_engine(f"sqlite:///{DB_PATH}")
+Session = sessionmaker(bind=engine)
+database = SQLDatabase(engine)
 
-def select_query(select_sql):
-    """Executes an SQL SELECT statement provided by the LLM."""
+# Define SQLAlchemy metadata
+metadata = MetaData()
+produkte = Table(
+    'produkte', metadata,
+    Column('product_number', Integer, primary_key=True),
+    Column('input_voltage', Integer),
+    Column('input_current', Integer),
+    Column('output_voltage', Integer),
+    Column('output_current', Integer),
+    Column('number_io_ports', Integer),
+    Column('bus_protocol', String),
+)
+
+@contextmanager
+def get_db_session():
+    """Provides a managed database session."""
+    session = Session()
     try:
-        # Ensure the query is not wrapped in extra quotes or incorrectly formatted
-        select_sql = select_sql.strip()
-        select_sql = re.sub(r"^['\"]|['\"]$", "", select_sql)  # Remove surrounding quotes if present
-        cursor.execute(select_sql)
-        result = cursor.fetchone()
-        if result:
-            column_names = [description[0] for description in cursor.description]
-            return dict(zip(column_names, result))
-        else:
-            return "No results found."
-    except sqlite3.Error as e:
+        yield session
+    finally:
+        session.close()
+
+# Query functions
+def select_query(select_sql, params=None):
+    """Executes an SQL SELECT statement safely with parameters."""
+    try:
+        with get_db_session() as session:
+            query = text(select_sql)
+            result = session.execute(query, params).fetchone()
+            return result if result else "No results found."
+    except Exception as e:
+        logger.error(f"Database query failed: {str(e)}")
         return f"Database query failed: {str(e)}"
 
-def execute_update_query(update_sql):
-    """Executes an SQL UPDATE statement provided by the LLM."""
+def execute_update_query(update_sql, params=None):
+    """Executes an SQL UPDATE statement safely with parameters."""
     try:
-        cursor.execute(update_sql)
-        conn.commit()
-        return "Database successfully updated."
-    except sqlite3.Error as e:
+        with get_db_session() as session:
+            session.execute(update_sql, params)
+            session.commit()
+            return "Database successfully updated."
+    except Exception as e:
+        logger.error(f"Database update failed: {str(e)}")
         return f"Database update failed: {str(e)}"
 
 # Initialize Planner and Executor LLMs
@@ -54,19 +76,18 @@ tools = [
     Tool(
         name="SelectQuery",
         func=select_query,
-        description="Use this tool to gather information from the database. You must generate a valid SQL SELECT statement and pass it to this tool. Example: If the user says 'Which input-voltage does the product with product-number 2 have?', generate: 'SELECT * FROM produkte WHERE product_number = 2'. Do NOT generate INSERT, DELETE, or DROP queries. The Table produkte has the following outline: (product_number INTEGER PRIMARY KEY, input_voltage INTEGER, input_current INTEGER, output_voltage INTEGER, output_current INTEGER, number_io_ports INTEGER, bus_protocol TEXT)"
+        description="Use this tool to gather information from the database. Generate a valid SQL SELECT statement and pass it to this tool. Example: 'SELECT * FROM produkte WHERE product_number = 2'."
     ),
     Tool(
         name="ExecuteUpdateQuery",
         func=execute_update_query,
-        description="Use this tool when the user provides an update statement about the database. You must generate a valid SQL UPDATE statement and pass it to this tool. Example: If the user says 'The input voltage of product 2 changed to 15V', generate: 'UPDATE produkte SET input_voltage = 15 WHERE product_number = 2'. Do NOT generate DELETE, or DROP queries. The Table produkte has the following outline: (product_number INTEGER PRIMARY KEY, input_voltage INTEGER, input_current INTEGER, output_voltage INTEGER, output_current INTEGER, number_io_ports INTEGER, bus_protocol TEXT)"
+        description="Use this tool to update records. Example: 'UPDATE produkte SET input_voltage = 15 WHERE product_number = 2'."
     )
 ]
 
-prompt_template = """You are an SQL expert. Answer the user's questions by querying the database.
-
-Only run a query if necessary, and stop once you retrieve the needed information. The information is packed in a json object and keys may differ slightly to your input.
-Just use tools once.
+prompt_template = """
+You are an SQL expert. Answer the user's questions by querying the database.
+Only run a query if necessary, and stop once you retrieve the needed information.
 
 User Question: {input}
 
@@ -80,15 +101,13 @@ executor = load_agent_executor(executor_llm, tools, verbose=True)
 # Initialize Plan-and-Execute Agent
 agent = PlanAndExecute(planner=planner, executor=executor, verbose=True)
 
-# Pass the first prompt directly to the model
+# Example prompt
 prompt = "Which input-voltage does the product with product-number 2 have?"
 response = agent.run(prompt)
 print("LLM:", response)
-conn.commit()
-exit(0)
+exit()
 
-
-# Run chat loop
+# Interactive chat loop
 print("Chat with the LLM (type 'exit' to stop)")
 while True:
     user_input = input("You: ")
@@ -96,6 +115,3 @@ while True:
         break
     response = agent.run(user_input)
     print("LLM:", response)
-
-# Close database connection
-conn.close()
