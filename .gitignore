@@ -1,0 +1,33 @@
+# Python environment
+.venv
+
+# Developement Artifacts
+tmp
+
+# Latex Log and Helperfiles 
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.vrb
+*.snm
+*.nav
+*.nlo
+
+# Latex PDF and temporary files
+*.pdf
+*.dvi
+*.ps
+*.xdv
+
+*/build/*
+.cache/*
